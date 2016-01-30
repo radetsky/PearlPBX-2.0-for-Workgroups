@@ -1,0 +1,7 @@
+*/debian/*.debhelper.log
+*/debian/pearlpbx-*
+*/debian/files
+build-area
+pearlpbx-*.deb
+pearlpbx-*.changes
+pearlpbx-*.tar.gz
