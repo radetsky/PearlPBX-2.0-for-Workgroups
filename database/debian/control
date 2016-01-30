@@ -1,0 +1,18 @@
+Source: pearlpbx-database
+Section: perl
+Priority: optional
+Maintainer: Alex Radetsky <rad@rad.kiev.ua>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: http://www.pearlpbx.com 
+#Vcs-Git: git://anonscm.debian.org/collab-maint/pearlpbx-database.git
+#Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/pearlpbx-database.git;a=summary
+
+Package: pearlpbx-database
+Architecture: all
+Depends: ${perl:Depends},
+         postgresql
+
+Description: SQL scheme for PearlPBX
+ SQL scheme for PearlPBX 2.0 for Workgroups 
+ 

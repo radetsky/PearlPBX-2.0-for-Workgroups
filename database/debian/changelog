@@ -1,0 +1,5 @@
+pearlpbx-database (2.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Alex Radetsky <rad@unknown>  Sat, 30 Jan 2016 20:40:06 +0200

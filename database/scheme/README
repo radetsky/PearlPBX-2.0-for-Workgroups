@@ -1,0 +1,6 @@
+
+psql -U postgres -f ./user.sql 
+psql -U postgres -f ./asterisk.sql 
+
+psql -U asterisk -f ./sip_conf.sql 
+
