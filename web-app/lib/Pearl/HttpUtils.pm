@@ -4,19 +4,13 @@ use warnings;
 use strict;
 
 use Pearl::Logger;
+use PearlPBX::Localization; 
 
 use Exporter;
 use parent qw(Exporter);
 our @EXPORT_OK = qw (http_accept_lang);
 
 sub http_accept_lang {
-
-    # RFC 2616, sec.14
-    # Examples:
-    # Chrome             'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
-    # Safari             'HTTP_ACCEPT_LANGUAGE' => 'uk-ua',
-    # Chrome             'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.8,ru;q=0.6',
-    # Accept-Language: da, en-gb;q=0.8, en;q=0.7
 
     my $http_accept_lang_str = shift;
     unless ( defined($http_accept_lang_str) ) {
