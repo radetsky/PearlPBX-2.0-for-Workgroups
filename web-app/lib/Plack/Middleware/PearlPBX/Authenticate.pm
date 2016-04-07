@@ -20,7 +20,6 @@ sub call {
 
     # Determine the best language
     my $lang = http_accept_lang($env->{'HTTP_ACCEPT_LANGUAGE'});
-    my $req = Plack::Request->new($env);
     my $session = $req->session;
     $req->session->{lang} = $lang // 'en';
 
@@ -34,9 +33,8 @@ sub call {
     }
 
     # Let's check a session.
-    my $session = $req->session;
     unless ( defined ( $session->{email} ) ) {
-        return ( $this->unauthenticated( $req, $env );
+        return $this->unauthenticated ( $req, $env );
     }
 
     Debugf( 'Current session: %s', $session );

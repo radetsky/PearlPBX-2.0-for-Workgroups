@@ -12,8 +12,9 @@ use Plack::App::Directory;
 use PearlPBX::Pages;
 use PearlPBX::Actions;
 
+use Pearl::Const; 
+
 use Plack::Middleware::PearlPBX::Authenticate;
-use Plack::Middleware::PearlPBX::UserTweaks;
 use Plack::Middleware::PearlPBX::Page500;
 use Plack::Middleware::StackTrace;
 use Plack::Middleware::Session;
@@ -27,22 +28,20 @@ use CHI::Driver::Memcached::Fast;
 # -------------- Plack application ------------
 
 my $app = builder {
-
-    if (LOCAL_RUN) {
+    mount "/" => builder { 	
         mount "/img" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/static/img' )
+            Plack::App::Directory->new( root => WWW_ROOT . '/img' )
             ->to_app;
         mount "/css" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/static/css' )
+            Plack::App::Directory->new( root => WWW_ROOT . '/css' )
             ->to_app;
         mount "/js" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/static/js' )
+            Plack::App::Directory->new( root => WWW_ROOT . '/js' )
             ->to_app;
         mount "/html" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/static/html' )
+            Plack::App::Directory->new( root => WWW_ROOT . '/html' )
             ->to_app;
-    }
-
+    }; 
     if ( $ENV{STARMAN_DEBUG} ) {
         enable "StackTrace", force => 1;
     }
@@ -60,11 +59,12 @@ my $app = builder {
         )
     );
 
-    enable 'PearlPBX::Authenticate';
-
     mount "/login" => builder { \&page_login };
     mount "/action/login" => builder { \&action_login };
-    mount "/"      => builder { \&page_status };
-
+   
+    mount "/"      => builder { 
+	enable 'PearlPBX::Authenticate'; 
+	mount "/index" => builder { \&page_index }; 
+    }; 
 };
 
