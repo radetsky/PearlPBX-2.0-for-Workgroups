@@ -5,3 +5,5 @@ build-area
 pearlpbx-*.deb
 pearlpbx-*.changes
 pearlpbx-*.tar.gz
+*.sublime-project
+*.sublime-workspace
