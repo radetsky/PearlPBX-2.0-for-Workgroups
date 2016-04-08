@@ -1,11 +1,16 @@
-package PearlPBX::Actions; 
+package PearlPBX::Actions;
 
 use warnings;
-use strict; 
+use strict;
 
 use Data::Dumper;
 
 use Plack::Request;
+
+use PearlPBX::ScalarUtils;
+use Pearl::Logger;
+use PearlPBX::Notifications;
+use Pearl::Const;
 
 use Exporter;
 use parent qw(Exporter);
@@ -14,6 +19,32 @@ our @EXPORT = qw (
     action_logout
 );
 
+sub _webuser_authenticate {
+    my ($email, $password) = @_;
+
+    my $crypted = undef;
+
+    eval {
+    ($crypted) = $this->{dbh}->selectrow_array("select role, passwd_hash from auth.sysusers where login=".$this->{dbh}->quote($username));
+    };
+
+  if ( $@ ) {
+    warn $this->{dbh}->errstr;
+    return undef;
+  }
+
+  if (defined $crypted) {
+    $crypted =~ s/\s+//gs;
+    if (crypt($password,$crypted) eq $crypted) {
+      $this->{userid} = $username;
+      $this->_loadProfile($this->{userid});
+      return 1;
+    }
+  }
+
+
+}
+
 sub action_login {
 
     my $env     = shift;
@@ -21,22 +52,31 @@ sub action_login {
     my $session = $req->session;
     my $params  = $req->parameters;
 
-    # $params is the hashref to Hash::MultiValue object, but with latest values we can
-    # work just like with usual perl hashes and hashrefs
+    my $email    = trim( $params->{log_username} // '' );
+    my $password = trim( $params->{log_password} // '' );
 
-    my $email    = trim($params->{log_username} // '');
-    my $password = trim($params->{log_password} // '');
-    
-    my $fail = 0; 
+    my $user = _webuser_authenticate( $email, $password );
 
-    if ( $fail > 0 ) {
+    # we waiting for { result = OK | FAIL, [ reason, user_params e.g. role, sip_name, etc. ]}
+    if ( !defined($user) || !defined( $user->{result} ) ) {
+        # Something goes wrong
+        MessageBox( $env, MSG_SERVER_ERROR, "error" );
         return page_login($env);
     }
-
-    my $res = $req->new_response( 302, [ 'Location' => '/' ] );
-    $res->body('Authenticated');
-    return $res->finalize($env);
-
+    elsif ( $user->{result} ne OK ) {
+        MessageBox( $env, $user->{reason}, "error" );
+        return page_login($env);
+    }
+    else {
+        $session->{'account'}     = $email;
+        $session->{'user_params'} = $user->{user_params};
+        my $res = $req->new_response( 302, [ 'Location' => '/' ] );
+        $res->body('Authenticated');
+        return $res->finalize($env);
+    }
+    MessageBox ($env, MSG_SERVER_ERROR, "error");
+    Err(MSG_SERVER_ERROR);
+    return page_login($env);
 }
 
 sub action_logout {
