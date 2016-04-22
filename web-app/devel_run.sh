@@ -1,7 +1,7 @@
 #!/bin/bash
 export FRONTEND_ROOT=$(dirname `realpath $0`)
 export PEARLPBX_ROOT=$(realpath $FRONTEND_ROOT/..)
-export PERL5LIB=$PEARLPBX_ROOT/lib:$FRONTEND_ROOT/lib
+export PERL5LIB=$PEARLPBX_ROOT/lib:$FRONTEND_ROOT/lib:$PEARLPBX_ROOT/common/lib
 export CONFIG_DIR=$PEARLPBX_ROOT/etc
 export LOG_STDERR=1
 export STARMAN_DEBUG=1
