@@ -1798,7 +1798,7 @@ create table auth.sysusers (
 	login varchar(32),
 	passwd_hash varchar(32),
 	roles pearlpbx_role[],
-	sip_peers_name VARCHAR(40) default NULL,
+	sip_peers_name VARCHAR(40) default NULL
 );
 alter table auth.sysusers owner to asterisk;
 
