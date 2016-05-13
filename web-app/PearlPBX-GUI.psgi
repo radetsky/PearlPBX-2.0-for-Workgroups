@@ -11,8 +11,10 @@ use Plack::App::Directory;
 # Own modules to present Pages and Actions
 use PearlPBX::Pages;
 use PearlPBX::Actions;
+use PearlPBX::DB;
 
-use Pearl::Const; 
+use Pearl::Const;
+
 
 use Plack::Middleware::PearlPBX::Authenticate;
 use Plack::Middleware::PearlPBX::Page500;
@@ -25,10 +27,14 @@ use CHI;
 use Cache::Memcached::Fast;
 use CHI::Driver::Memcached::Fast;
 
+use POSIX;
+
+POSIX::AtFork->add_to_child( sub { PearlPBX::DB->new("pearlpbx.conf"); } );
+
 # -------------- Plack application ------------
 
 my $app = builder {
-    mount "/" => builder { 	
+    mount "/" => builder {
         mount "/img" =>
             Plack::App::Directory->new( root => WWW_ROOT . '/img' )
             ->to_app;
@@ -41,7 +47,7 @@ my $app = builder {
         mount "/html" =>
             Plack::App::Directory->new( root => WWW_ROOT . '/html' )
             ->to_app;
-    }; 
+    };
     if ( $ENV{STARMAN_DEBUG} ) {
         enable "StackTrace", force => 1;
     }
@@ -61,10 +67,10 @@ my $app = builder {
 
     mount "/login" => builder { \&page_login };
     mount "/action/login" => builder { \&action_login };
-   
-    mount "/"      => builder { 
-	enable 'PearlPBX::Authenticate'; 
-	mount "/index" => builder { \&page_index }; 
-    }; 
+
+    mount "/"      => builder {
+	enable 'PearlPBX::Authenticate';
+	mount "/index" => builder { \&page_index };
+    };
 };
 
