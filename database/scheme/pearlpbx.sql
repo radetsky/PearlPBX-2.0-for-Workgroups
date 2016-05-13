@@ -1795,7 +1795,7 @@ CREATE TYPE pearlpbx_role AS ENUM ('user','admin','reportview');
 
 create table auth.sysusers (
 	id bigserial primary key,
-	login varchar(32),
+	login varchar(64),
 	passwd_hash varchar(32),
 	roles pearlpbx_role[],
 	sip_peers_name VARCHAR(40) default NULL
@@ -1816,6 +1816,52 @@ set search_path to public;
 create index queue_parsed_id_idx on queue_parsed ( id );
 create index queue_parsed_callerid_idx on queue_parsed ( callerid );
 create index queue_parsed_queue_idx on queue_parsed ( queue );
-create index quque_parsed_status_idx on queue_parsed (status);
+create index queue_parsed_status_idx on queue_parsed (status);
+
+
+set search_path to routing;
+
+CREATE FUNCTION get_callerid_for_local_forward ( number_b character varying ) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $_$
+declare
+
+DIR_ID bigint;
+CALLER_ID character varying;
+
+begin
+
+--
+-- getting direction_id by number_b
+--
+
+select dr_list_item into DIR_ID from routing.directions
+	where $1 ~ dr_prefix
+	order by dr_prio
+	asc
+	limit 1;
+
+if not found then
+	raise exception 'NO DESTINATION BY NUMBER_B';
+end if;
+
+--
+-- get caller id
+--
+
+select set_callerid into CALLER_ID from routing.callerid
+	where direction_id = DIR_ID and sip_id is NULL;
+if not found then
+	return '';
+end if;
+
+return CALLER_ID;
+
+end;
+
+$_$;
+
+ALTER FUNCTION routing.get_callerid_for_local_forward( number_b character varying) OWNER TO asterisk;
+
 
 
