@@ -37,8 +37,8 @@ sub new {
 
     my %cf_hash = $config->getall or ();
     $this = bless {
-      conf = \%cf_hash,
-      dbh  = undef
+      conf => \%cf_hash,
+      dbh  => undef
     }, $class;
 
     $this->_connect();
@@ -56,8 +56,8 @@ sub _connect {
   my $pass = $this->{conf}->{db}->{main}->{password} // 'supersecret';
 
   if ( !$this->{dbh} or !$this->{dbh}->ping ) {
-    $this->{dbh} = DBI->connect_cached( $dsn, $user, $passwd,
-                    { RaiseError => 1, AutoCommit => 0 } );
+    $this->{dbh} = DBI->connect_cached ( $dsn, $user, $pass,
+                    { RaiseError => 1, AutoCommit => 1 } );
 
   }
   if ( !$this->{dbh} ) {
@@ -67,3 +67,6 @@ sub _connect {
   return 1;
 
 }
+
+1;
+

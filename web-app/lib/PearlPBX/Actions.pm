@@ -22,8 +22,10 @@ our @EXPORT = qw (
 );
 
 sub _webuser_authenticate {
-  my ($email, $password) = @_;
+  my ($username, $password) = @_;
   my $crypted = undef;
+  my $sip_name = undef; 
+  my $role = undef; 
 
   eval {
       ($sip_name, $role, $crypted) = pearlpbx_db->selectrow_array (
@@ -32,7 +34,7 @@ sub _webuser_authenticate {
   };
 
   if ( $@ ) {
-    Errf("%s, %s", $this->{dbh}->errstr, $@);
+    Errf("%s, %s", pearlpbx_db->errstr, $@);
     return { result => FAIL, reason => "Invalid password" };
   }
 

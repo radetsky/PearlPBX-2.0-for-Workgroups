@@ -27,7 +27,7 @@ use CHI;
 use Cache::Memcached::Fast;
 use CHI::Driver::Memcached::Fast;
 
-use POSIX;
+use POSIX::AtFork;
 
 POSIX::AtFork->add_to_child( sub { PearlPBX::DB->new("pearlpbx.conf"); } );
 
