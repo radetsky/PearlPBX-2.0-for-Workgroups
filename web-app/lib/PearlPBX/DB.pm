@@ -5,14 +5,21 @@ use strict;
 
 use DBI;
 use Config::General;
+use Exporter; 
 
-use Exporter;
-our @EXPORT = qw(pearlpbx_db);
+our @EXPORT_OK = qw(
+	pearlpbx_db
+);
+
+sub import {
+    splice @_, 0, 1, __PACKAGE__ unless $_[0] eq __PACKAGE__;
+    goto &Exporter::import;
+}
 
 my $this;
 
 sub pearlpbx_db {
-  return $this;
+    return $this->{dbh};  
 }
 
 sub new {
@@ -25,7 +32,7 @@ sub new {
       -AllowMultiOptions => 'yes',
       -UseApacheInclude  => 'yes',
       -InterPolateVars   => 'yes',
-      -ConfigPath        => [ $ENV{PEARL_CONF_DIR}, '/etc/PearlPBX' ],
+      -ConfigPath        => [ $ENV{PEARLPBX_CONFIG_DIR}, '/etc/PearlPBX' ],
       -IncludeRelative   => 'yes',
       -IncludeGlob       => 'yes',
       -UTF8              => 'yes',
