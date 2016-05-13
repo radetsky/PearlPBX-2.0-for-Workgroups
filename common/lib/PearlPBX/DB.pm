@@ -32,7 +32,7 @@ sub new {
       -AllowMultiOptions => 'yes',
       -UseApacheInclude  => 'yes',
       -InterPolateVars   => 'yes',
-      -ConfigPath        => [ $ENV{PEARLPBX_CONFIG_DIR}, '/etc/PearlPBX' ],
+      -ConfigPath        => [ $ENV{PEARLPBX_CONFIG_DIR} // '/', '/etc/PearlPBX' ],
       -IncludeRelative   => 'yes',
       -IncludeGlob       => 'yes',
       -UTF8              => 'yes',

@@ -87,7 +87,7 @@ sub page_index {
     $template_vars = tmpl_finalize( $env, $template_vars );
 
     my $processed = '';
-    $template->process( 'login.tmpl', $template_vars, \$processed )
+    $template->process( 'index.tmpl', $template_vars, \$processed )
       or die $template->error();
     $res->body($processed);
 
