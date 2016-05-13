@@ -8,9 +8,11 @@ use Data::Dumper;
 use Plack::Request;
 
 use PearlPBX::ScalarUtils;
-use Pearl::Logger;
 use PearlPBX::Notifications;
+use PearlPBX::DB;
+
 use Pearl::Const;
+use Pearl::Logger;
 
 use Exporter;
 use parent qw(Exporter);
@@ -20,28 +22,35 @@ our @EXPORT = qw (
 );
 
 sub _webuser_authenticate {
-    my ($email, $password) = @_;
+  my ($email, $password) = @_;
+  my $crypted = undef;
 
-    my $crypted = undef;
-
-    eval {
-    ($crypted) = $this->{dbh}->selectrow_array("select role, passwd_hash from auth.sysusers where login=".$this->{dbh}->quote($username));
-    };
+  eval {
+      ($sip_name, $role, $crypted) = pearlpbx_db->selectrow_array (
+          "select sip_peers_name, role, passwd_hash from auth.sysusers where login=" .
+          pearlpbx_db->quote($username));
+  };
 
   if ( $@ ) {
-    warn $this->{dbh}->errstr;
-    return undef;
+    Errf("%s, %s", $this->{dbh}->errstr, $@);
+    return { result => FAIL, reason => "Invalid password" };
   }
 
-  if (defined $crypted) {
+  if ( $crypted ) {
     $crypted =~ s/\s+//gs;
-    if (crypt($password,$crypted) eq $crypted) {
-      $this->{userid} = $username;
-      $this->_loadProfile($this->{userid});
-      return 1;
+    if ( crypt( $password,$crypted ) eq $crypted) {
+      my $user_params = {
+        username => $username,
+        role     => $role,
+        sip_name => $sip_name,
+      };
+      return { result => OK, params => $user_params };
+    } else {
+      return { result => FAIL, reason => 'Invalid password'};
     }
   }
-
+  Err("User does not exists");
+  return { result => FAIL, reason => 'Invalid password'};
 
 }
 
@@ -69,7 +78,7 @@ sub action_login {
     }
     else {
         $session->{'account'}     = $email;
-        $session->{'user_params'} = $user->{user_params};
+        $session->{'user_params'} = $user->{params};
         my $res = $req->new_response( 302, [ 'Location' => '/' ] );
         $res->body('Authenticated');
         return $res->finalize($env);
