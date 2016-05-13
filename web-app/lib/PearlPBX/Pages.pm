@@ -6,6 +6,7 @@ use strict;
 use Encode;
 use JSON::XS;
 use Pearl::Const;
+use Pearl::HttpUtils qw(http_accept_lang);  
 
 use PearlPBX::Notifications;
 use PearlPBX::Localization;

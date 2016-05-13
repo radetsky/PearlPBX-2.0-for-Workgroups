@@ -7,7 +7,7 @@ use DBI;
 use Config::General;
 
 use Exporter;
-our @EXPORT_OK = qw(pearlpbx_db);
+our @EXPORT = qw(pearlpbx_db);
 
 my $this;
 

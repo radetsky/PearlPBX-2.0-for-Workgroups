@@ -7,9 +7,11 @@ use Data::Dumper;
 
 use Plack::Request;
 
-use PearlPBX::ScalarUtils;
+use PearlPBX::ScalarUtils qw/trim/;
 use PearlPBX::Notifications;
 use PearlPBX::DB;
+
+use PearlPBX::Pages; 
 
 use Pearl::Const;
 use Pearl::Logger;
@@ -28,13 +30,13 @@ sub _webuser_authenticate {
   my $role = undef; 
 
   eval {
-      ($sip_name, $role, $crypted) = pearlpbx_db->selectrow_array (
+      ($sip_name, $role, $crypted) = pearlpbx_db()->selectrow_array (
           "select sip_peers_name, role, passwd_hash from auth.sysusers where login=" .
-          pearlpbx_db->quote($username));
+          pearlpbx_db()->quote($username));
   };
 
   if ( $@ ) {
-    Errf("%s, %s", pearlpbx_db->errstr, $@);
+    Errf("%s", $@);
     return { result => FAIL, reason => "Invalid password" };
   }
 
