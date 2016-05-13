@@ -1,14 +1,15 @@
-package PearlPBX::Pages; 
+package PearlPBX::Pages;
 
-use warnings; 
-use strict; 
+use warnings;
+use strict;
 
-use Encode; 
-use JSON::XS; 
-use Pearl::Const; 
+use Encode;
+use JSON::XS;
+use Pearl::Const;
+use Pearl::HttpUtils qw(http_accept_lang);  
 
-use PearlPBX::Notifications; 
-use PearlPBX::Localization; 
+use PearlPBX::Notifications;
+use PearlPBX::Localization;
 
 use feature 'state';
 
@@ -23,9 +24,9 @@ use Template::Iterator;
 use Exporter;
 use parent qw(Exporter);
 our @EXPORT = qw (
-    page_login 
+    page_login
     page_index
-); 
+);
 
 sub tmpl_finalize {
     my $env     = shift;
@@ -86,12 +87,12 @@ sub page_index {
     $template_vars = tmpl_finalize( $env, $template_vars );
 
     my $processed = '';
-    $template->process( 'login.tmpl', $template_vars, \$processed )
+    $template->process( 'index.tmpl', $template_vars, \$processed )
       or die $template->error();
     $res->body($processed);
 
     return $res->finalize($env);
 }
 
-1; 
+1;
 

@@ -11,8 +11,9 @@ use Plack::App::Directory;
 # Own modules to present Pages and Actions
 use PearlPBX::Pages;
 use PearlPBX::Actions;
+use PearlPBX::DB;
 
-use Pearl::Const; 
+use Pearl::Const;
 
 use Plack::Middleware::PearlPBX::Authenticate;
 use Plack::Middleware::PearlPBX::Page500;
@@ -25,23 +26,13 @@ use CHI;
 use Cache::Memcached::Fast;
 use CHI::Driver::Memcached::Fast;
 
+use POSIX::AtFork;
+
+POSIX::AtFork->add_to_child( sub { PearlPBX::DB->new("pearlpbx.conf"); } );
+
 # -------------- Plack application ------------
 
 my $app = builder {
-    mount "/" => builder { 	
-        mount "/img" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/img' )
-            ->to_app;
-        mount "/css" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/css' )
-            ->to_app;
-        mount "/js" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/js' )
-            ->to_app;
-        mount "/html" =>
-            Plack::App::Directory->new( root => WWW_ROOT . '/html' )
-            ->to_app;
-    }; 
     if ( $ENV{STARMAN_DEBUG} ) {
         enable "StackTrace", force => 1;
     }
@@ -50,21 +41,33 @@ my $app = builder {
         enable 'PearlPBX::Page500';
     }
 
-    enable 'Session', store => Plack::Session::Store::Cache->new(
-        cache => CHI->new (
-            driver => 'Memcached::Fast',
+    enable 'Session',
+      store => Plack::Session::Store::Cache->new(
+        cache => CHI->new(
+            driver             => 'Memcached::Fast',
             namespace          => 'sessions',
             servers            => ["127.0.0.1:11211"],
             compress_threshold => 10_000,
         )
-    );
+      );
 
-    mount "/login" => builder { \&page_login };
-    mount "/action/login" => builder { \&action_login };
-   
-    mount "/"      => builder { 
-	enable 'PearlPBX::Authenticate'; 
-	mount "/index" => builder { \&page_index }; 
-    }; 
+    mount "/" => builder {
+        mount "/login"        => builder { \&page_login };
+        mount "/action/login" => builder { \&action_login };
+	mount "/action/logout" => builder { \&action_logout }; 
+        mount "/img" =>
+          Plack::App::Directory->new( root => WWW_ROOT . '/img' )->to_app;
+        mount "/css" =>
+          Plack::App::Directory->new( root => WWW_ROOT . '/css' )->to_app;
+        mount "/js" =>
+          Plack::App::Directory->new( root => WWW_ROOT . '/js' )->to_app;
+        mount "/html" =>
+          Plack::App::Directory->new( root => WWW_ROOT . '/html' )->to_app;
+        mount "/" => builder {
+            enable 'PearlPBX::Authenticate';
+            mount "/"      => builder { \&page_index };
+            mount "/index" => builder { \&page_index };
+        };
+    };
 };
 

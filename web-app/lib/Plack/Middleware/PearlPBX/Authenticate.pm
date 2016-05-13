@@ -33,7 +33,7 @@ sub call {
     }
 
     # Let's check a session.
-    unless ( defined ( $session->{email} ) ) {
+    unless ( defined ( $session->{account} ) ) {
         return $this->unauthenticated ( $req, $env );
     }
 
