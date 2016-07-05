@@ -739,8 +739,8 @@ CREATE TABLE ulines (
     cdr_start character varying,
     channel_name character varying,
     uniqueid character varying,
-		userfield character varying not null default '',
-		integration_type character varying default '' not null
+    userfield character varying not null default '',
+	integration_type character varying default '' not null
 );
 
 
@@ -1862,6 +1862,18 @@ end;
 $_$;
 
 ALTER FUNCTION routing.get_callerid_for_local_forward( number_b character varying) OWNER TO asterisk;
+
+set search_path to public; 
+
+CREATE TABLE monitor_list (
+    id bigserial NOT NULL PRIMARY KEY ,
+    number character varying(20) NOT NULL,
+    reason character varying(255) DEFAULT NULL::character varying,
+    create_date timestamp without time zone DEFAULT now()
+);
+
+ALTER TABLE public.monitor_list OWNER TO asterisk;
+CREATE unique INDEX monitor_list_idx on monitor_list ( number);
 
 
 
